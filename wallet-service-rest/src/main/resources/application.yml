@@ -1,0 +1,9 @@
+server:
+  port: 8950
+
+spring:
+  application:
+    name: wallet-service
+  profiles:
+    active: @profiles.active@
+

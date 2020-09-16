@@ -1,0 +1,118 @@
+spring:
+  messages:
+    basename: i18n/message
+  mvc:
+    throw-exception-if-no-handler-found: true
+  datasource:
+    #   数据源基本配置
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/jingwei-wallet?characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      maximumPoolSize: 10
+      minimumIdle: 2
+      idleTimeout: 600000
+      connectionTimeout: 30000
+      maxLifetime: 1800000
+      connection-test-query: SELECT 1
+
+#    #   数据源其他配置
+#    initialSize: 5
+#    minIdle: 5
+#    maxActive: 20
+#    maxWait: 60000
+#    timeBetweenEvictionRunsMillis: 60000
+#    minEvictableIdleTimeMillis: 300000
+#    validationQuery: SELECT 1 FROM DUAL
+#    testWhileIdle: true
+#    testOnBorrow: false
+#    testOnReturn: false
+#    poolPreparedStatements: true
+#    #   配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+#    filters: stat,wall
+#    maxPoolPreparedStatementPerConnectionSize: 20
+#    useGlobalDataSourceStat: true
+#    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+#  kafka:
+#    bootstrap-servers: localhost:9092
+#    listener:
+#      ack-mode: RECORD
+#      concurrency: 1
+#    producer:
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+#      compression-type: lz4
+#      acks: -1
+#      properties:
+#        schema.registry.url: http://localhost:8081
+#        enable.idempotence: true
+
+#mybaits-plus配置，修改主键类型，mapper.xml、type 别名等
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/*Mapper.xml
+  typeAliasesPackage: io.jingwei.wallet.biz.entity,io.jingwei.base.idgen.worker.entity
+  global-config:
+    #主键类型  0:"数据库ID自增", 1:"用户输入ID",2:"全局唯一ID (数字类型唯一ID)", 3:"全局唯一ID UUID";
+    id-type: 0
+    #字段策略 0:"忽略判断",1:"非 NULL 判断"),2:"非空判断"
+    field-strategy: 1
+    #驼峰下划线转换
+    db-column-underline: true
+    #刷新mapper 调试神器
+    refresh-mapper: true
+    #数据库大写下划线转换
+    #capital-mode: true
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: true
+
+
+jetcache:
+  statIntervalMinutes: 15
+  areaInCacheName: false
+  local:
+    default:
+      type: linkedhashmap
+      keyConvertor: fastjson
+  remote:
+    default:
+      type: redis
+      keyConvertor: fastjson
+      valueEncoder: kryo
+      valueDecoder: kryo
+      poolConfig:
+        minIdle: 5
+        maxIdle: 20
+        maxTotal: 50
+      host: 127.0.0.1
+      port: 6379
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    serviceUrl:
+      defaultZone: http://eureka:password@localhost:8761/eureka
+    enabled: true
+    register-with-eureka: true
+
+
+xxl:
+  job:
+    admin:
+      # 地址为刚刚配置的调度中心的访问地址
+      addresses: http://127.0.0.1:8080/xxl-job-admin
+    executor:
+      # 自定义appName（执行器名称）
+      appname: xxl-job-appName
+      # ip 可以写 （程序跑在的机器ip上），也可以不写
+      ip:
+      port: 9999
+      # 执行器日志文件存储路径
+      logpath: /data/applogs/xxl-job/jobhandler
+      # 设置日志过期时间  -1表示永不过期
+      logretentiondays: -1
+      accessToken: 123456
+
