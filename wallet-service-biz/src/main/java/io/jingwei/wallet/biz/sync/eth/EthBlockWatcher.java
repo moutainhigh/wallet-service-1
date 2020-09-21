@@ -77,7 +77,7 @@ public class EthBlockWatcher extends AbstractBlockWatcher {
         blockSubscription = web3jClient.getWeb3j()
                 .replayPastAndFutureBlocksFlowable(blockParam, true)
                 .doOnError((error) -> onError(error))
-                .subscribe(block -> triggerListeners(block), (error) -> onError(error));
+                .subscribe(block -> triggerListener(block), (error) -> onError(error));
     }
 
     @Override
@@ -93,13 +93,13 @@ public class EthBlockWatcher extends AbstractBlockWatcher {
         }
     }
 
-    private void triggerListeners(EthBlock blockObject) {
+    private void triggerListener(EthBlock blockObject) {
         if (blockObject != null) {
-            triggerListeners0(blockObject);
+            triggerListener0(blockObject);
         }
     }
 
-    private void triggerListeners0(EthBlock ethBlock) {
+    private void triggerListener0(EthBlock ethBlock) {
         asyncService.execute(ExecutorNameFactory.build(BLOCK_EXECUTOR_NAME, ethSyncConfig.getNodeName()), () -> {
             final BigInteger expectedBlock = BigInteger.valueOf(lastBlockNumberProcessed.get()).add(BigInteger.ONE);
 

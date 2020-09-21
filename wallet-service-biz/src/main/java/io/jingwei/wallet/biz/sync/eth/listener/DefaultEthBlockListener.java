@@ -1,7 +1,5 @@
 package io.jingwei.wallet.biz.sync.eth.listener;
-//
-//import io.andy.rocketmq.wrapper.core.RMWrapper;
-//import io.andy.rocketmq.wrapper.core.producer.RMProducer;
+//x
 import io.jingwei.base.utils.tx.TxTemplateService;
 import io.jingwei.wallet.biz.exception.ParseTxException;
 import io.jingwei.wallet.biz.service.IEthBlockService;
