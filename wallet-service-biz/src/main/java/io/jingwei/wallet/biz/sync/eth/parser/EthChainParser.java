@@ -24,8 +24,8 @@ public class EthChainParser {
     public void parse(ParserContext context) {
         if (index == parsers.size()) return;
 
-        EthParser filter = parsers.get(index);
+        EthParser parser = parsers.get(index);
         index++;
-        filter.parse(context, this);
+        parser.parse(context, this);
     }
 }

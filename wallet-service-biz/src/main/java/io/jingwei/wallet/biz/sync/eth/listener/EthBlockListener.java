@@ -1,6 +1,6 @@
 
 
-package io.jingwei.wallet.biz.sync.eth;
+package io.jingwei.wallet.biz.sync.eth.listener;
 
 
 import org.web3j.protocol.core.methods.response.EthBlock;
@@ -11,11 +11,10 @@ import org.web3j.protocol.core.methods.response.EthBlock;
  */
 public interface EthBlockListener {
 
-    void before(EthBlock.Block block);
     /**
-     * Called when a new block is detected fron the ethereum node.
+     * Called when a new block is detected from the eth node.
      *
      * @param block The new block
      */
-    void after(EthBlock.Block block);
+    void onBlock(EthBlock.Block block);
 }

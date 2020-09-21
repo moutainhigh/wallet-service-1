@@ -23,11 +23,10 @@ public class EthBlockServiceImpl extends ServiceImpl<EthBlockMapper, EthBlock> i
     }
 
     @Override
-    public void deleteGTBlock(long blockHeight) {
+    public void deleteGreaterBlock(long blockHeight) {
         lambdaUpdate()
-                .set(EthBlock::getDeleted, true)
                 .gt(EthBlock::getBlockHeight, blockHeight)
-                .update();
+                .remove();
     }
 
     @Override

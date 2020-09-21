@@ -1,4 +1,4 @@
-package io.jingwei.wallet.biz.sync.eth;
+package io.jingwei.wallet.biz.support;
 
 import io.jingwei.wallet.biz.config.EthSyncConfig;
 import lombok.Getter;

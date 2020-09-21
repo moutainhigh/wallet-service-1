@@ -2,6 +2,7 @@ package io.jingwei.wallet.biz.service;
 
 import io.jingwei.wallet.biz.entity.EthLatest;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.web3j.protocol.core.methods.response.EthBlock;
 
 import java.util.Optional;
 
@@ -17,10 +18,11 @@ public interface IEthLatestService extends IService<EthLatest> {
     /**
      * Returns the latest block, for the specified node.
      *
-     * @param nodeName The nodename
      * @return The block details
      */
-    Optional<EthLatest> getLatestBlock(String nodeName);
+    Optional<EthLatest> getLatestBlock();
 
-    void updateByHeight(long height);
+    void updateByOldBlock(long height);
+
+    void updateByNewBlock(EthBlock.Block block);
 }

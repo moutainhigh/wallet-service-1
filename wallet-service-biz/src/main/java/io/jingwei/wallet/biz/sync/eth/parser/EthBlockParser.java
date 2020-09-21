@@ -1,10 +1,7 @@
 package io.jingwei.wallet.biz.sync.eth.parser;
 
 import io.jingwei.wallet.biz.entity.EthTx;
-import io.jingwei.wallet.biz.sync.eth.EthRpcCall;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.web3j.protocol.core.methods.response.EthBlock;
@@ -12,9 +9,6 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static io.jingwei.wallet.biz.utils.EthUtils.fromWei;
 
@@ -22,17 +16,6 @@ import static io.jingwei.wallet.biz.utils.EthUtils.fromWei;
 @Component
 @Slf4j
 public class EthBlockParser implements EthParser {
-
-    private final AtomicInteger sn         = new AtomicInteger();
-    private final Executor taskExecutor    = Executors.newCachedThreadPool((Runnable r) -> {
-        Thread t = new Thread(r);
-        t.setDaemon(true);
-        t.setName("EthTxParserThread-" + sn.incrementAndGet());
-        return t;
-    });
-
-    @Autowired
-    private EthRpcCall ethRpcCall;
 
     @Override
     public void parse(ParserContext context, EthChainParser chain) {

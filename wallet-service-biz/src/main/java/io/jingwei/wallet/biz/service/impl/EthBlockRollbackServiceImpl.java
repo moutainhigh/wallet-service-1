@@ -22,8 +22,8 @@ public class EthBlockRollbackServiceImpl implements IEthRollbackService {
     @Override
     public void rollback(long blockHeight) {
         txTemplateService.doInTransaction(()->{
-            ethBlockService.deleteGTBlock(blockHeight);
-            ethLatestService.updateByHeight(blockHeight);
+            ethBlockService.deleteGreaterBlock(blockHeight);
+            ethLatestService.updateByOldBlock(blockHeight);
         });
     }
 }

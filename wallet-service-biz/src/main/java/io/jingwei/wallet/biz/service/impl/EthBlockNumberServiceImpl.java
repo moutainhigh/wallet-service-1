@@ -6,7 +6,7 @@ import io.jingwei.wallet.biz.config.EthSyncConfig;
 import io.jingwei.wallet.biz.entity.EthLatest;
 import io.jingwei.wallet.biz.service.IEthBlockNumberService;
 import io.jingwei.wallet.biz.service.IEthLatestService;
-import io.jingwei.wallet.biz.sync.eth.EthRpcCall;
+import io.jingwei.wallet.biz.support.EthRpcCall;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -61,8 +61,7 @@ public class EthBlockNumberServiceImpl implements IEthBlockNumberService {
 
     @Override
     public Optional<EthLatest> getLatestBlock() {
-        final String nodeName = ethSyncConfig.getNodeName();
-        return ethLatestService.getLatestBlock(nodeName);
+        return ethLatestService.getLatestBlock();
     }
 
     private long getCurrentBlockAtStartup() {

@@ -29,20 +29,29 @@ public class EthLatestServiceImpl extends ServiceImpl<EthLatestMapper, EthLatest
     @Autowired
     private EthSyncConfig    ethSyncConfig;
 
+
     @Override
-    public Optional<EthLatest> getLatestBlock(String nodeName) {
+    public Optional<EthLatest> getLatestBlock() {
         return Optional.ofNullable(
                 lambdaQuery()
-                .eq(EthLatest::getNodeName, nodeName)
+                .eq(EthLatest::getNodeName, ethSyncConfig.getNodeName())
                 .one()
         );
     }
 
     @Override
-    public void updateByHeight(long height) {
+    public void updateByOldBlock(long height) {
         EthBlock ethBlock = ethBlockService.getByHeight(height);
         lambdaUpdate().set(EthLatest::getHeight, height)
                 .set(EthLatest::getHash, ethBlock.getBlockHash())
+                .eq(EthLatest::getNodeName, ethSyncConfig.getNodeName())
+                .update();
+    }
+
+    @Override
+    public void updateByNewBlock(org.web3j.protocol.core.methods.response.EthBlock.Block block) {
+        lambdaUpdate().set(EthLatest::getHeight, block.getNumber().longValue())
+                .set(EthLatest::getHash, block.getHash())
                 .eq(EthLatest::getNodeName, ethSyncConfig.getNodeName())
                 .update();
     }

@@ -1,13 +1,23 @@
 package io.jingwei.wallet.biz.sync.eth;
 
+import com.google.common.collect.Lists;
 import io.jingwei.wallet.biz.config.EthSyncConfig;
+import io.jingwei.wallet.biz.entity.EthLatest;
+import io.jingwei.wallet.biz.exception.ForkException;
 import io.jingwei.wallet.biz.service.IEthBlockNumberService;
+import io.jingwei.wallet.biz.service.IEthBlockService;
+import io.jingwei.wallet.biz.service.IEthRollbackService;
+import io.jingwei.wallet.biz.support.EthRpcCall;
+import io.jingwei.wallet.biz.support.Web3jClient;
 import io.jingwei.wallet.biz.sync.AbstractBlockWatcher;
+import io.jingwei.wallet.biz.sync.eth.listener.DefaultEthBlockListener;
+import io.jingwei.wallet.biz.sync.eth.listener.EthBlockListener;
 import io.jingwei.wallet.biz.utils.AsyncTaskService;
 import io.jingwei.wallet.biz.utils.ExecutorNameFactory;
 import io.jingwei.wallet.biz.utils.SingleThreadedAsyncTaskService;
 import io.reactivex.disposables.Disposable;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.web3j.protocol.core.DefaultBlockParameter;
@@ -16,36 +26,43 @@ import org.web3j.protocol.core.methods.response.EthBlock;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 @Service
 public class EthBlockWatcher extends AbstractBlockWatcher {
-    private static final String       BLOCK_EXECUTOR_NAME = "BLOCK";
+    private static final String            BLOCK_EXECUTOR_NAME = "BLOCK";
 
-    private AsyncTaskService          asyncService = new SingleThreadedAsyncTaskService();
+    private AsyncTaskService               asyncService = new SingleThreadedAsyncTaskService();
 
-    private AtomicLong                lastBlockNumberProcessed = new AtomicLong(0);
+    private AtomicLong                     lastBlockNumberProcessed = new AtomicLong(0);
 
-    private Collection<EthBlockListener> blockListeners = new ConcurrentLinkedQueue<>();
+    private EthBlockListener               blockListener;
 
-    private Disposable                blockSubscription;
-
-    @Autowired
-    private IEthBlockNumberService ethBlockNumberService;
+    private Disposable                     blockSubscription;
 
     @Autowired
-    private Web3jClient               web3jClient;
+    private IEthBlockNumberService         ethBlockNumberService;
 
     @Autowired
-    private EthSyncConfig             ethSyncConfig;
+    private Web3jClient                    web3jClient;
+
+    @Autowired
+    private EthSyncConfig                  ethSyncConfig;
+
+    @Autowired
+    private IEthRollbackService            ethRollbackService;
+
+    @Autowired
+    private IEthBlockService               ethBlockService;
+
+    @Autowired
+    private EthRpcCall                     ethRpcCall;
 
 
     @PostConstruct
     private void init() {
-        blockListeners.add(new DefaultEthBlockListener());
+        blockListener = new DefaultEthBlockListener();
     }
 
     @Override
@@ -105,7 +122,7 @@ public class EthBlockWatcher extends AbstractBlockWatcher {
                         final EthBlock.Block block = getBlockWithNumber(nextBlock);
 
                         if (block != null) {
-                            blockListeners.forEach(listener -> triggerListener(listener, block));
+                            triggerListener(blockListener, block);
                         }
                         updateLastBlockProcessed(block);
                     } catch (Throwable t) {
@@ -114,7 +131,7 @@ public class EthBlockWatcher extends AbstractBlockWatcher {
                 }
             }
 
-            blockListeners.forEach(listener -> triggerListener(listener, ethBlock.getBlock()));
+            triggerListener(blockListener, ethBlock.getBlock());
             updateLastBlockProcessed(ethBlock.getBlock());
         });
     }
@@ -138,11 +155,36 @@ public class EthBlockWatcher extends AbstractBlockWatcher {
 
     private void triggerListener(EthBlockListener listener, EthBlock.Block block) {
         try {
-            listener.before(block);
-            listener.after(block);
+            checkChainFork(block);
+            listener.onBlock(block);
         } catch (Throwable t) {
             onError(t);
         }
+    }
+
+    private void checkChainFork(EthBlock.Block block) {
+        if (hasChainFork(block)) {
+            Long forkRoot = getForkRoot(block.getParentHash());
+            ethRollbackService.rollback(forkRoot);
+
+            log.warn("Block has a fork when height={}", forkRoot);
+            throw new ForkException("Block has a fork when height equals: " + forkRoot);
+        }
+    }
+
+    private Long getForkRoot(String parentHash) {
+        io.jingwei.wallet.biz.entity.EthBlock block;
+        while ((block = ethBlockService.getByHash(parentHash)) == null) {
+            parentHash = ethRpcCall.getBlockHash(parentHash);
+        }
+
+        return block.getBlockHeight();
+    }
+
+    private boolean hasChainFork(EthBlock.Block block) {
+        EthLatest preBlock = ethBlockNumberService.getLatestBlock().get();
+
+        return preBlock != null && !StringUtils.equals(block.getParentHash(), preBlock.getHash());
     }
 
 

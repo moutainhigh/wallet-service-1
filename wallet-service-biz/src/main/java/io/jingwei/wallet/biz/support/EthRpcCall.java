@@ -1,4 +1,4 @@
-package io.jingwei.wallet.biz.sync.eth;
+package io.jingwei.wallet.biz.support;
 
 import io.jingwei.base.utils.exception.BizErr;
 import lombok.extern.slf4j.Slf4j;

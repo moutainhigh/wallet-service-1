@@ -15,7 +15,7 @@ public interface IEthBlockService extends IService<EthBlock> {
 
     void saveBlock(org.web3j.protocol.core.methods.response.EthBlock.Block block);
 
-    void deleteGTBlock(long blockHeight);
+    void deleteGreaterBlock(long blockHeight);
 
     EthBlock getByHash(String blockHash);
 
