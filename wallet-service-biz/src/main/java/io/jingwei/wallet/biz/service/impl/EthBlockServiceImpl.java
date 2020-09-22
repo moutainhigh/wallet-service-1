@@ -20,6 +20,12 @@ public class EthBlockServiceImpl extends ServiceImpl<EthBlockMapper, EthBlock> i
     @Override
     public void saveBlock(org.web3j.protocol.core.methods.response.EthBlock.Block block) {
 
+        EthBlock newBlock = new EthBlock().setBlockHash(block.getHash())
+                .setBlockHeight(block.getNumber().longValue())
+                .setPreBlockHash(block.getParentHash())
+                .setBlockTime(block.getTimestamp().longValue())
+                .setDeleted(false);
+        save(newBlock);
     }
 
     @Override
@@ -41,6 +47,7 @@ public class EthBlockServiceImpl extends ServiceImpl<EthBlockMapper, EthBlock> i
     public EthBlock getByHeight(long height) {
         return lambdaQuery()
                 .eq(EthBlock::getBlockHeight, height)
+                .eq(EthBlock::getDeleted, false)
                 .one();
     }
 }

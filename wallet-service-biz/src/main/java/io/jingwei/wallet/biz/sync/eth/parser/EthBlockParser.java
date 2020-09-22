@@ -37,7 +37,7 @@ public class EthBlockParser implements EthParser {
                          Optional<TransactionReceipt> receipt) {
         if (receipt.isPresent()) {
             EthTx ethTx = new EthTx().setTxHash(tx.getHash())
-                    .setStatus(receipt.get().isStatusOK())
+                    .setSuccess(receipt.get().isStatusOK())
                     .setTxIndex(tx.getTransactionIndex().intValue())
                     .setAmount(fromWei(tx.getValue()))
                     .setBlockHeight(tx.getBlockNumber().longValue())

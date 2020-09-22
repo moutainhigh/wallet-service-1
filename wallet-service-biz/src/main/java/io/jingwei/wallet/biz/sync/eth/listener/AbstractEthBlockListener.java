@@ -21,11 +21,11 @@ public  abstract class AbstractEthBlockListener implements EthBlockListener {
         parseComplete();
     }
 
-    private void createContext(EthBlock.Block block) {
+    protected void createContext(EthBlock.Block block) {
         this.parserContext =  new ParserContext().setBlock(block);
     }
 
-    private void addTxParsers() {
+    protected void addTxParsers() {
         ethChainParser.addParser(new EthBlockParser());
     }
 

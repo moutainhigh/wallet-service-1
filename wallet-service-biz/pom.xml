@@ -11,6 +11,10 @@
 
     <artifactId>wallet-service-biz</artifactId>
 
+    <properties>
+        <rocketmq.version>4.4.0</rocketmq.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.web3j</groupId>
@@ -79,6 +83,24 @@
             <artifactId>modelmapper</artifactId>
             <version>1.1.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.github.zxgangandy.rocketmq-wrapper</groupId>
+            <artifactId>rocketmq-wrapper-core</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-client</artifactId>
+            <version>${rocketmq.version}</version>
+        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.apache.rocketmq</groupId>-->
+            <!--<artifactId>rocketmq-client</artifactId>-->
+            <!--<version>4.5.1</version>-->
+            <!--<scope>compile</scope>-->
+        <!--</dependency>-->
 
     </dependencies>
 </project>

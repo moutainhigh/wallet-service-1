@@ -1,6 +1,5 @@
 package io.jingwei.wallet.biz.sync.eth;
 
-import com.google.common.collect.Lists;
 import io.jingwei.wallet.biz.config.EthSyncConfig;
 import io.jingwei.wallet.biz.entity.EthLatest;
 import io.jingwei.wallet.biz.exception.ForkException;
