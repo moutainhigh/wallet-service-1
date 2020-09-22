@@ -6,10 +6,12 @@ import io.jingwei.wallet.biz.mapper.EthTxMapper;
 import io.jingwei.wallet.biz.service.IEthTxService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <p>
@@ -21,7 +23,8 @@ import java.util.List;
  */
 @Service
 public class EthTxServiceImpl extends ServiceImpl<EthTxMapper, EthTx> implements IEthTxService {
-    private static final int CONFIRMED_HEIGHT = 6;
+    @Value("${eth.confirmed.height:6}")
+    private Integer                            ethConfirmedHeight;
 
     @Override
     public void saveOrUpdateList(Collection<EthTx> entityList) {
@@ -38,8 +41,21 @@ public class EthTxServiceImpl extends ServiceImpl<EthTxMapper, EthTx> implements
     @Override
     public List<EthTx> listConfirmedTx(long currentHeight) {
         return lambdaQuery()
-                .le(EthTx::getBlockHeight, currentHeight - CONFIRMED_HEIGHT)
-                .eq(EthTx::getProcessed, false)
+                .le(EthTx::getBlockHeight, currentHeight - ethConfirmedHeight)
+                .eq(EthTx::getNotified, false)
                 .list();
+    }
+
+    @Override
+    public void updateTxNotified(String txHash) {
+        lambdaUpdate()
+                .set(EthTx::getNotified, true)
+                .eq(EthTx::getTxHash, txHash)
+                .update();
+    }
+
+    @Override
+    public Optional<EthTx> getByHash(String txHash) {
+        return lambdaQuery().eq(EthTx::getTxHash, txHash).oneOpt();
     }
 }

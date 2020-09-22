@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <p>
@@ -19,4 +20,8 @@ public interface IEthTxService extends IService<EthTx> {
     void saveOrUpdateList(Collection<EthTx> entityList);
 
     List<EthTx> listConfirmedTx(long currentHeight);
+
+    void updateTxNotified(String txHash);
+
+    Optional<EthTx> getByHash(String txHash);
 }

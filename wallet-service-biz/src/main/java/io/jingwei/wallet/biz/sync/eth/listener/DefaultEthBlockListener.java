@@ -1,14 +1,15 @@
 package io.jingwei.wallet.biz.sync.eth.listener;
 
-import io.andy.rocketmq.wrapper.core.RMWrapper;
-import io.andy.rocketmq.wrapper.core.producer.RMProducer;
+import io.jingwei.base.utils.tx.TxTemplateService;
 import io.jingwei.wallet.biz.exception.ParseTxException;
+import io.jingwei.wallet.biz.service.IEthBlockService;
+import io.jingwei.wallet.biz.service.IEthLatestService;
+import io.jingwei.wallet.biz.service.IEthTxService;
 import io.jingwei.wallet.biz.support.EthRpcCall;
 import io.jingwei.wallet.biz.sync.eth.parser.EthChainParser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -22,8 +23,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static io.jingwei.wallet.biz.constant.MessageTopics.PARSE_ETH_COMPLETE_TOPIC;
-
 
 @Component
 @Slf4j
@@ -33,21 +32,23 @@ public class DefaultEthBlockListener extends AbstractEthBlockListener {
 
     private EthParseListener                  ethParseListener;
 
-    private RMProducer                        parseCompleteProducer;
-
     @Autowired
     private EthChainParser                    ethChainParser;
 
     @Autowired
     private EthRpcCall                        ethRpcCall;
 
-    @Value("${rocketmq.nameServer:127.0.0.1:9876}")
-    private String                            nameSrvAddr;
-    /**
-     * 交易解析完成后发送的事务消息监听器，从而保证本地数据存储和消息到达broker是原子操作
-     */
     @Autowired
-    private EthTxListener parseCompleteTxListener;
+    private TxTemplateService                 txTemplateService;
+
+    @Autowired
+    private IEthBlockService                  blockService;
+
+    @Autowired
+    private IEthTxService                     ethTxService;
+
+    @Autowired
+    private IEthLatestService                 ethLatestService;
 
 
     private final AtomicInteger sn            = new AtomicInteger();
@@ -60,7 +61,6 @@ public class DefaultEthBlockListener extends AbstractEthBlockListener {
 
     @PostConstruct
     private void init() {
-        createParseCompleteProducer();
         createParseCompleteListener();
     }
 
@@ -89,7 +89,13 @@ public class DefaultEthBlockListener extends AbstractEthBlockListener {
 
     @Override
     protected void parseComplete() {
-        ethParseListener.onComplete(parseCompleteProducer, parserContext);
+        txTemplateService.doInTransaction(() -> {
+            ethTxService.saveOrUpdateList(parserContext.getTxList());
+            blockService.saveBlock(parserContext.getBlock());
+            ethLatestService.updateByNewBlock(parserContext.getBlock());
+        });
+
+        ethParseListener.onComplete(parserContext);
     }
 
     private void parsePipeline(EthBlock.TransactionObject tx) {
@@ -100,15 +106,7 @@ public class DefaultEthBlockListener extends AbstractEthBlockListener {
         ethChainParser.parse(parserContext);
     }
 
-    private void createParseCompleteProducer() {
-        parseCompleteProducer = RMWrapper.with(RMProducer.class)
-                .producerGroup(PARSE_ETH_COMPLETE_TOPIC.getProducerGroup())
-                .transactionListener(parseCompleteTxListener)
-                .topic(PARSE_ETH_COMPLETE_TOPIC.getTopic())
-                .retryTimes(SEND_RETRY_TIMES)
-                .nameSrvAddr(nameSrvAddr)
-                .start();
-    }
+
 
     private void createParseCompleteListener() {
         ethParseListener = new DefaultEthParseListener();
