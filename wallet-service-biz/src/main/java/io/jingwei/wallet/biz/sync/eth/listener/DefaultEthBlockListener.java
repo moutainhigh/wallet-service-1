@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -28,8 +27,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DefaultEthBlockListener extends AbstractEthBlockListener {
 
-    private static final int SEND_RETRY_TIMES = 3;
-
+    @Autowired
     private EthParseListener                  ethParseListener;
 
     @Autowired
@@ -58,11 +56,6 @@ public class DefaultEthBlockListener extends AbstractEthBlockListener {
         t.setName("EthTxParserThread-" + sn.incrementAndGet());
         return t;
     });
-
-    @PostConstruct
-    private void init() {
-        createParseCompleteListener();
-    }
 
     @Override
     protected void parseTxAsync() {
@@ -106,10 +99,5 @@ public class DefaultEthBlockListener extends AbstractEthBlockListener {
         ethChainParser.parse(parserContext);
     }
 
-
-
-    private void createParseCompleteListener() {
-        ethParseListener = new DefaultEthParseListener();
-    }
 
 }
