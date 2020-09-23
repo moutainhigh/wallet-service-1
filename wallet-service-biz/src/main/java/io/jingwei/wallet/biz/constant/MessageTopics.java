@@ -12,19 +12,12 @@ import lombok.Getter;
 public enum MessageTopics {
 
     /**
-     * PARSE_ETH_COMPLETE_TOPIC 交易解析完成通知协议
+     * ETH_TX_CONFIRMED_TOPIC 交易解析完成通知协议
      */
-    PARSE_ETH_COMPLETE_TOPIC("PARSE_ETH_COMPLETE_TOPIC",
-            "PID_PARSE_ETH_COMPLETE_TOPIC",
-            "CID_PARSE_ETH_COMPLETE_TOPIC",
-            "交易解析完成通知协议"),
-    /**
-     * ORDER_STATUS_UPDATE_TOPIC 返回创建订单账务冻结结果
-     */
-    ORDER_STATUS_UPDATE_TOPIC("ORDER_STATUS_UPDATE_TOPIC",
-            "PID_ORDER_STATUS_UPDATE_TOPIC",
-            "CID_ORDER_STATUS_UPDATE_TOPIC",
-            "返回创建订单账务冻结结果协议"),
+    ETH_TX_CONFIRMED_TOPIC("ETH_TX_CONFIRMED_TOPIC",
+            "PID_TX_CONFIRMED_TOPIC",
+            "CID_TX_CONFIRMED_TOPIC",
+            "eth交易确认完成通知协议"),
 
 
     ;

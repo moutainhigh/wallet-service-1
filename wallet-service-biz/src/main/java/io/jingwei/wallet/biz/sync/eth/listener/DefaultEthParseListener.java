@@ -2,11 +2,11 @@ package io.jingwei.wallet.biz.sync.eth.listener;
 
 import io.andy.rocketmq.wrapper.core.RMWrapper;
 import io.andy.rocketmq.wrapper.core.producer.RMProducer;
+import io.jingwei.wallet.biz.config.EthSyncConfig;
 import io.jingwei.wallet.biz.entity.EthTx;
 import io.jingwei.wallet.biz.service.IEthTxService;
 import io.jingwei.wallet.biz.sync.eth.parser.ParserContext;
 import io.jingwei.wallet.biz.utils.AsyncTaskService;
-import io.jingwei.wallet.biz.utils.ExecutorNameFactory;
 import io.jingwei.wallet.biz.utils.SingleThreadedAsyncTaskService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -16,12 +16,13 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static io.jingwei.wallet.biz.constant.MessageTopics.PARSE_ETH_COMPLETE_TOPIC;
+import static io.jingwei.wallet.biz.constant.MessageTopics.ETH_TX_CONFIRMED_TOPIC;
+import static io.jingwei.wallet.biz.utils.ExecutorNameFactory.build;
 
 @Component
 @Slf4j
 public class DefaultEthParseListener implements EthParseListener {
-    private static final String TX_EXECUTOR_NAME = "tx-confirm-executor";
+    private static final String TX_EXECUTOR_NAME = "tx-confirmed-executor";
 
     private AsyncTaskService asyncService        = new SingleThreadedAsyncTaskService();
 
@@ -42,12 +43,15 @@ public class DefaultEthParseListener implements EthParseListener {
     @Value("${rocketmq.nameServer:127.0.0.1:9876}")
     private String                               nameSrvAddr;
 
+    @Autowired
+    private EthSyncConfig                        ethSyncConfig;
+
     /**
      *  消费端需要自己处理幂等问题，不排除同一个消息多次投递
      */
     @Override
     public void onComplete(ParserContext context) {
-        asyncService.execute(ExecutorNameFactory.build(TX_EXECUTOR_NAME, ""), ()->{
+        asyncService.execute(build(TX_EXECUTOR_NAME, ethSyncConfig.getNodeName()), ()->{
             long currentHeight = context.getBlock().getNumber().longValue();
             List<EthTx> ethTxList =  ethTxService.listConfirmedTx(currentHeight);
 
@@ -58,8 +62,8 @@ public class DefaultEthParseListener implements EthParseListener {
     }
 
     /**
-     *  发送已经被确认的交易通知给消费端，消费端可以更新交易状态或者做账务操作等
-     *  （此处的消息类型为事务消息，尽量保证消息能够到达broker）
+     * 发送已经被确认的交易通知给消费端，消费端可以更新交易状态或者做账务操作等
+     * （此处的消息类型为事务消息，尽量保证消息能够到达broker）
      */
     private void sendTxConfirmedMessage(EthTx ethTx) {
         createProducerIfNeed();
@@ -74,9 +78,9 @@ public class DefaultEthParseListener implements EthParseListener {
     private void createProducerIfNeed() {
         if (producer == null) {
             producer = RMWrapper.with(RMProducer.class)
-                    .producerGroup(PARSE_ETH_COMPLETE_TOPIC.getProducerGroup())
+                    .producerGroup(ETH_TX_CONFIRMED_TOPIC.getProducerGroup())
                     .transactionListener(ethTxListener)
-                    .topic(PARSE_ETH_COMPLETE_TOPIC.getTopic())
+                    .topic(ETH_TX_CONFIRMED_TOPIC.getTopic())
                     .retryTimes(sendRetryTimes)
                     .nameSrvAddr(nameSrvAddr)
                     .start();
