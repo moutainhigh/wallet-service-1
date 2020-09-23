@@ -36,7 +36,7 @@ public class DefaultEthParseListener implements EthParseListener {
     @Autowired
     private EthTxListener                        ethTxListener;
 
-    @Value("${tx.confirm.retry:3}")
+    @Value("${confirmed.message.retry:3}")
     private Integer                              sendRetryTimes;
 
     @Value("${rocketmq.nameServer:127.0.0.1:9876}")
@@ -52,21 +52,22 @@ public class DefaultEthParseListener implements EthParseListener {
             List<EthTx> ethTxList =  ethTxService.listConfirmedTx(currentHeight);
 
             if (CollectionUtils.isNotEmpty(ethTxList)) {
-                ethTxList.stream().forEach(ethTx -> sendConfirmedTxMessage(ethTx));
+                ethTxList.stream().forEach(ethTx -> sendTxConfirmedMessage(ethTx));
             }
         });
     }
 
     /**
      *  发送已经被确认的交易通知给消费端，消费端可以更新交易状态或者做账务操作等
+     *  （此处的消息类型为事务消息，尽量保证消息能够到达broker）
      */
-    private void sendConfirmedTxMessage(EthTx ethTx) {
+    private void sendTxConfirmedMessage(EthTx ethTx) {
         createProducerIfNeed();
 
         try {
             producer.sendTransactionMessage(ethTx, ethTx);
         } catch (Exception e) {
-            log.error("sendTransactionMessage failed, e={}", e);
+            log.error("send tx confirmed message failed, e={}", e);
         }
     }
 
