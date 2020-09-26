@@ -27,6 +27,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DefaultEthBlockListener extends AbstractEthBlockListener {
 
+    /**
+     * 交易解析完成的时候执行的listener
+     */
     @Autowired
     private EthParseListener                  ethParseListener;
 
