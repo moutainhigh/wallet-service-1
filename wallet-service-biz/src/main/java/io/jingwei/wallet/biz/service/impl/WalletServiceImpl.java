@@ -50,4 +50,7 @@ public class WalletServiceImpl implements IWalletService {
 
         return new NewAddressBO().setAddress(address);
     }
+
+
+
 }
