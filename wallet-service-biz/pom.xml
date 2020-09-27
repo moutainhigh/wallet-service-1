@@ -78,29 +78,18 @@
             <artifactId>okhttp-urlconnection</artifactId>
             <version>4.3.1</version>
         </dependency>
-        <dependency>
-            <groupId>org.modelmapper</groupId>
-            <artifactId>modelmapper</artifactId>
-            <version>1.1.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.github.zxgangandy.rocketmq-wrapper</groupId>
-            <artifactId>rocketmq-wrapper-core</artifactId>
-            <version>1.0.1</version>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.rocketmq</groupId>
             <artifactId>rocketmq-client</artifactId>
             <version>${rocketmq.version}</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.apache.rocketmq</groupId>-->
-            <!--<artifactId>rocketmq-client</artifactId>-->
-            <!--<version>4.5.1</version>-->
-            <!--<scope>compile</scope>-->
-        <!--</dependency>-->
+
+        <dependency>
+            <groupId>io.github.zxgangandy.rocketmq-wrapper</groupId>
+            <artifactId>rocketmq-wrapper-core</artifactId>
+            <version>1.0.2</version>
+        </dependency>
 
     </dependencies>
 </project>
