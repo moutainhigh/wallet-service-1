@@ -123,3 +123,5 @@ eth:
     nodeName: Test
     url:
 
+  encrypt:
+    key: ENC(CCs5sdzhs6MFh8fkQw3ultCBo3F9yhzh2RdNBIbSGqc=)
