@@ -21,10 +21,10 @@ import static io.jingwei.wallet.biz.utils.ExecutorNameFactory.build;
 
 @Component
 @Slf4j
-public class DefaultEthParseListener implements EthParseListener {
-    private static final String TX_EXECUTOR_NAME = "tx-confirmed-executor";
+public class EthTxUnconfirmListener implements EthParseListener {
+    private static final String TX_UNCONFIRM_EXECUTOR_NAME = "tx-unconfirmed-executor";
 
-    private AsyncTaskService asyncService        = new SingleThreadedAsyncTaskService();
+    private AsyncTaskService unconfirmAsyncService         = new SingleThreadedAsyncTaskService();
 
     private RMProducer                           producer;
 
@@ -35,7 +35,7 @@ public class DefaultEthParseListener implements EthParseListener {
      * 交易确认消息发送的事务消息监听器，从而保证本地数据存储和消息到达broker是原子操作
      */
     @Autowired
-    private EthTxListener                        ethTxListener;
+    private EthTxConfirmTxListener ethTxListener;
 
     @Value("${confirmed.message.retry:3}")
     private Integer                              sendRetryTimes;
@@ -51,9 +51,9 @@ public class DefaultEthParseListener implements EthParseListener {
      */
     @Override
     public void onComplete(ParserContext context) {
-        asyncService.execute(build(TX_EXECUTOR_NAME, ethSyncConfig.getNodeName()), ()->{
+        unconfirmAsyncService.execute(build(TX_UNCONFIRM_EXECUTOR_NAME, ethSyncConfig.getNodeName()), ()->{
             long currentHeight = context.getBlock().getNumber().longValue();
-            List<EthTx> ethTxList =  ethTxService.listConfirmedTx(currentHeight);
+            List<EthTx> ethTxList =  ethTxService.listUnconfirmedTx(currentHeight);
 
             if (CollectionUtils.isNotEmpty(ethTxList)) {
                 ethTxList.stream().forEach(ethTx -> sendTxConfirmedMessage(ethTx));

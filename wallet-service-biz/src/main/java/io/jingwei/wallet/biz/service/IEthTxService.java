@@ -21,7 +21,11 @@ public interface IEthTxService extends IService<EthTx> {
 
     List<EthTx> listConfirmedTx(long currentHeight);
 
-    void updateTxNotified(String txHash);
+    List<EthTx> listUnconfirmedTx(long currentHeight);
+
+    boolean updateConfirmNotified(String txHash);
+
+    boolean updateUnconfirmNotified(String txHash);
 
     Optional<EthTx> getByHash(String txHash);
 }

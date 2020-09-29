@@ -42,14 +42,30 @@ public class EthTxServiceImpl extends ServiceImpl<EthTxMapper, EthTx> implements
     public List<EthTx> listConfirmedTx(long currentHeight) {
         return lambdaQuery()
                 .le(EthTx::getBlockHeight, currentHeight - ethConfirmedHeight)
-                .eq(EthTx::getNotified, false)
+                .eq(EthTx::getConfirmNotified, false)
                 .list();
     }
 
     @Override
-    public void updateTxNotified(String txHash) {
-        lambdaUpdate()
-                .set(EthTx::getNotified, true)
+    public List<EthTx> listUnconfirmedTx(long currentHeight) {
+        return lambdaQuery()
+                .le(EthTx::getBlockHeight, currentHeight)
+                .eq(EthTx::getUnconfirmNotified, false)
+                .list();
+    }
+
+    @Override
+    public boolean updateConfirmNotified(String txHash) {
+        return lambdaUpdate()
+                .set(EthTx::getConfirmNotified, true)
+                .eq(EthTx::getTxHash, txHash)
+                .update();
+    }
+
+    @Override
+    public boolean updateUnconfirmNotified(String txHash) {
+        return lambdaUpdate()
+                .set(EthTx::getUnconfirmNotified, true)
                 .eq(EthTx::getTxHash, txHash)
                 .update();
     }

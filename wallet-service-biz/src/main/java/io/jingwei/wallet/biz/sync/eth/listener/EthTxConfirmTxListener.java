@@ -1,11 +1,11 @@
 package io.jingwei.wallet.biz.sync.eth.listener;
 
+import io.andy.rocketmq.wrapper.core.producer.listener.AbstractTransactionListener;
 import io.jingwei.base.utils.exception.BizErr;
 import io.jingwei.wallet.biz.entity.EthTx;
 import io.jingwei.wallet.biz.service.IEthTxService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.producer.LocalTransactionState;
-import org.apache.rocketmq.client.producer.TransactionListener;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,27 +15,27 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * 发送ETH解析完成的事务性消息监听器
+ * 发送ETH交易被确认的事务性消息监听器
  */
 @Component
 @Slf4j
-public class EthTxListener implements TransactionListener {
+public class EthTxConfirmTxListener extends AbstractTransactionListener {
 
-
-    private EthTx             ethTx;
 
     @Autowired
     private IEthTxService     ethTxService;
 
 
     @Override
-    public LocalTransactionState executeLocalTransaction(Message message, Object o) {
+    public LocalTransactionState executeTransaction(Message message, Object o) {
 
-        this.ethTx = (EthTx) o;
+        EthTx ethTx = (EthTx) o;
         Objects.requireNonNull(ethTx);
 
         try {
-            ethTxService.updateTxNotified(ethTx.getTxHash());
+            if (!ethTxService.updateConfirmNotified(ethTx.getTxHash())) {
+                return LocalTransactionState.ROLLBACK_MESSAGE;
+            }
         } catch (BizErr err) {
             return LocalTransactionState.ROLLBACK_MESSAGE;
         } catch (Exception e) {
@@ -47,13 +47,14 @@ public class EthTxListener implements TransactionListener {
     }
 
     @Override
-    public LocalTransactionState checkLocalTransaction(MessageExt messageExt) {
+    public LocalTransactionState checkTransaction(MessageExt messageExt, Object msgBody) {
+        EthTx ethTx = (EthTx) msgBody;
         if (ethTx == null) {
             return LocalTransactionState.ROLLBACK_MESSAGE;
         }
 
         Optional<EthTx> txOptional = ethTxService.getByHash(ethTx.getTxHash());
-        if (!txOptional.isPresent() || !txOptional.get().getNotified()) {
+        if (!txOptional.isPresent() || !txOptional.get().getConfirmNotified()) {
             return LocalTransactionState.ROLLBACK_MESSAGE;
         }
 

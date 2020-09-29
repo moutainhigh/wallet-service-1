@@ -31,7 +31,7 @@ public class DefaultEthBlockListener extends AbstractEthBlockListener {
      * 交易解析完成的时候执行的listener
      */
     @Autowired
-    private EthParseListener                  ethParseListener;
+    private List<EthParseListener>            ethParseListeners;
 
     @Autowired
     private EthChainParser                    ethChainParser;
@@ -91,7 +91,7 @@ public class DefaultEthBlockListener extends AbstractEthBlockListener {
             ethLatestService.updateByNewBlock(parserContext.getBlock());
         });
 
-        ethParseListener.onComplete(parserContext);
+        ethParseListeners.stream().forEach(listener -> listener.onComplete(parserContext));
     }
 
     private void parsePipeline(EthBlock.TransactionObject tx) {
