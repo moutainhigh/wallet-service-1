@@ -12,12 +12,20 @@ import lombok.Getter;
 public enum MessageTopics {
 
     /**
-     * ETH_TX_CONFIRMED_TOPIC 交易解析完成通知协议
+     * ETH_TX_CONFIRMED_TOPIC 交易确认通知协议
      */
     ETH_TX_CONFIRMED_TOPIC("ETH_TX_CONFIRMED_TOPIC",
             "PID_TX_CONFIRMED_TOPIC",
             "CID_TX_CONFIRMED_TOPIC",
-            "eth交易确认完成通知协议"),
+            "eth交易确认通知协议"),
+
+    /**
+     * ETH_TX_UNCONFIRMED_TOPIC 交易被挖矿通知协议
+     */
+    ETH_TX_UNCONFIRMED_TOPIC("ETH_TX_UNCONFIRMED_TOPIC",
+            "PID_TX_UNCONFIRMED_TOPIC",
+            "CID_TX_UNCONFIRMED_TOPIC",
+            "eth交易被挖矿通知协议"),
 
 
     ;
