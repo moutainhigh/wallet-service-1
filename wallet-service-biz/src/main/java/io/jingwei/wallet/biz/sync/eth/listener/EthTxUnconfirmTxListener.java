@@ -1,5 +1,6 @@
 package io.jingwei.wallet.biz.sync.eth.listener;
 
+import io.andy.rocketmq.wrapper.core.producer.listener.AbstractTransactionListener;
 import io.jingwei.base.utils.exception.BizErr;
 import io.jingwei.wallet.biz.entity.EthTx;
 import io.jingwei.wallet.biz.service.IEthTxService;
@@ -19,19 +20,16 @@ import java.util.Optional;
  */
 @Component
 @Slf4j
-public class EthTxUnconfirmTxListener implements TransactionListener {
-
-
-    private EthTx             ethTx;
+public class EthTxUnconfirmTxListener extends AbstractTransactionListener {
 
     @Autowired
     private IEthTxService     ethTxService;
 
 
     @Override
-    public LocalTransactionState executeLocalTransaction(Message message, Object o) {
+    public LocalTransactionState executeTransaction(Message message, Object o) {
 
-        this.ethTx = (EthTx) o;
+        EthTx ethTx = (EthTx) o;
         Objects.requireNonNull(ethTx);
 
         try {
@@ -49,7 +47,8 @@ public class EthTxUnconfirmTxListener implements TransactionListener {
     }
 
     @Override
-    public LocalTransactionState checkLocalTransaction(MessageExt messageExt) {
+    public LocalTransactionState checkTransaction(MessageExt messageExt, Object msgBody) {
+        EthTx ethTx = (EthTx) msgBody;
         if (ethTx == null) {
             return LocalTransactionState.ROLLBACK_MESSAGE;
         }

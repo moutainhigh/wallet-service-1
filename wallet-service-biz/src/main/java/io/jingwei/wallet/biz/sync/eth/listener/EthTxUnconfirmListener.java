@@ -35,7 +35,7 @@ public class EthTxUnconfirmListener implements EthParseListener {
      * 交易被挖矿消息发送的事务消息监听器，从而保证本地数据存储和消息到达broker是原子操作
      */
     @Autowired
-    private EthTxConfirmTxListener ethTxListener;
+    private EthTxUnconfirmTxListener                       unconfirmTxListener;
 
     @Value("${confirmed.message.retry:3}")
     private Integer                                        sendRetryTimes;
@@ -79,7 +79,7 @@ public class EthTxUnconfirmListener implements EthParseListener {
         if (producer == null) {
             producer = RMWrapper.with(RMProducer.class)
                     .producerGroup(ETH_TX_UNCONFIRMED_TOPIC.getProducerGroup())
-                    .transactionListener(ethTxListener)
+                    .transactionListener(unconfirmTxListener)
                     .topic(ETH_TX_UNCONFIRMED_TOPIC.getTopic())
                     .retryTimes(sendRetryTimes)
                     .nameSrvAddr(nameSrvAddr)
