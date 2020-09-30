@@ -19,12 +19,10 @@ import java.util.Optional;
  */
 @Component
 @Slf4j
-public class EthTxConfirmTxListener extends AbstractTransactionListener {
-
+public class EthTxConfirmedTxListener extends AbstractTransactionListener {
 
     @Autowired
     private IEthTxService     ethTxService;
-
 
     @Override
     public LocalTransactionState executeTransaction(Message message, Object o) {

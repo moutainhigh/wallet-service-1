@@ -20,7 +20,7 @@ import java.util.Optional;
  */
 @Component
 @Slf4j
-public class EthTxUnconfirmTxListener extends AbstractTransactionListener {
+public class EthTxUnconfirmedTxListener extends AbstractTransactionListener {
 
     @Autowired
     private IEthTxService     ethTxService;

@@ -16,15 +16,15 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static io.jingwei.wallet.biz.constant.MessageTopics.ETH_TX_UNCONFIRMED_TOPIC;
+import static io.jingwei.wallet.biz.constant.MessageTopics.ETH_TX_CONFIRMED_TOPIC;
 import static io.jingwei.wallet.biz.utils.ExecutorNameFactory.build;
 
 @Component
 @Slf4j
-public class EthTxUnconfirmListener implements EthParseListener {
-    private static final String TX_UNCONFIRM_EXECUTOR_NAME = "tx-unconfirmed-executor";
+public class EthConfirmedMsgListener implements EthParseListener {
+    private static final String TX_CONFIRM_EXECUTOR_NAME   = "tx-confirmed-executor";
 
-    private AsyncTaskService unconfirmAsyncService         = new SingleThreadedAsyncTaskService();
+    private AsyncTaskService confirmAsyncService           = new SingleThreadedAsyncTaskService();
 
     private RMProducer                                     producer;
 
@@ -32,10 +32,10 @@ public class EthTxUnconfirmListener implements EthParseListener {
     private IEthTxService                                  ethTxService;
 
     /**
-     * 交易被挖矿消息发送的事务消息监听器，从而保证本地数据存储和消息到达broker是原子操作
+     * 交易确认消息发送的事务消息监听器，从而保证本地数据存储和消息到达broker是原子操作
      */
     @Autowired
-    private EthTxUnconfirmTxListener                       unconfirmTxListener;
+    private EthTxConfirmedTxListener                       ethConfirmedTxListener;
 
     @Value("${confirmed.message.retry:3}")
     private Integer                                        sendRetryTimes;
@@ -51,21 +51,21 @@ public class EthTxUnconfirmListener implements EthParseListener {
      */
     @Override
     public void onComplete(ParserContext context) {
-        unconfirmAsyncService.execute(build(TX_UNCONFIRM_EXECUTOR_NAME, ethSyncConfig.getNodeName()), ()->{
+        confirmAsyncService.execute(build(TX_CONFIRM_EXECUTOR_NAME, ethSyncConfig.getNodeName()), ()->{
             long currentHeight = context.getBlock().getNumber().longValue();
-            List<EthTx> ethTxList =  ethTxService.listUnconfirmedTx(currentHeight);
+            List<EthTx> ethTxList =  ethTxService.listConfirmedTx(currentHeight);
 
             if (CollectionUtils.isNotEmpty(ethTxList)) {
-                ethTxList.stream().forEach(ethTx -> sendTxUnconfirmedMessage(ethTx));
+                ethTxList.stream().forEach(ethTx -> sendTxConfirmedMessage(ethTx));
             }
         });
     }
 
     /**
-     * 发送已经被挖矿的交易通知给消费端，消费端可以更新交易状态操作等
+     * 发送已经被确认的交易通知给消费端，消费端可以更新交易状态或者做账务操作等
      * （此处的消息类型为事务消息，尽量保证消息能够到达broker）
      */
-    private void sendTxUnconfirmedMessage(EthTx ethTx) {
+    private void sendTxConfirmedMessage(EthTx ethTx) {
         createProducerIfNeed();
 
         try {
@@ -78,9 +78,9 @@ public class EthTxUnconfirmListener implements EthParseListener {
     private void createProducerIfNeed() {
         if (producer == null) {
             producer = RMWrapper.with(RMProducer.class)
-                    .producerGroup(ETH_TX_UNCONFIRMED_TOPIC.getProducerGroup())
-                    .transactionListener(unconfirmTxListener)
-                    .topic(ETH_TX_UNCONFIRMED_TOPIC.getTopic())
+                    .producerGroup(ETH_TX_CONFIRMED_TOPIC.getProducerGroup())
+                    .transactionListener(ethConfirmedTxListener)
+                    .topic(ETH_TX_CONFIRMED_TOPIC.getTopic())
                     .retryTimes(sendRetryTimes)
                     .nameSrvAddr(nameSrvAddr)
                     .start();
