@@ -18,37 +18,6 @@ spring:
       maxLifetime: 1800000
       connection-test-query: SELECT 1
 
-#    #   数据源其他配置
-#    initialSize: 5
-#    minIdle: 5
-#    maxActive: 20
-#    maxWait: 60000
-#    timeBetweenEvictionRunsMillis: 60000
-#    minEvictableIdleTimeMillis: 300000
-#    validationQuery: SELECT 1 FROM DUAL
-#    testWhileIdle: true
-#    testOnBorrow: false
-#    testOnReturn: false
-#    poolPreparedStatements: true
-#    #   配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
-#    filters: stat,wall
-#    maxPoolPreparedStatementPerConnectionSize: 20
-#    useGlobalDataSourceStat: true
-#    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
-#  kafka:
-#    bootstrap-servers: localhost:9092
-#    listener:
-#      ack-mode: RECORD
-#      concurrency: 1
-#    producer:
-#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-#      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
-#      compression-type: lz4
-#      acks: -1
-#      properties:
-#        schema.registry.url: http://localhost:8081
-#        enable.idempotence: true
-
 #mybaits-plus配置，修改主键类型，mapper.xml、type 别名等
 mybatis-plus:
   mapper-locations: classpath*:/mapper/*Mapper.xml
@@ -120,7 +89,7 @@ xxl:
 eth:
   sync:
     initialStartBlock: 5560182
-    nodeName: Test
+    nodeName: testnet
     url:
 
   encrypt:

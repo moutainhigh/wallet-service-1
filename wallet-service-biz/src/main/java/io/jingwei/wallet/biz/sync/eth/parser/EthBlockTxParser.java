@@ -33,24 +33,26 @@ public class EthBlockTxParser implements EthParser {
         parseTx0(txList, block, tx, receipt);
     }
 
-    private void parseTx0(List<EthTx> txList, EthBlock.Block block, EthBlock.TransactionObject tx ,
-                         Optional<TransactionReceipt> receipt) {
-        if (receipt.isPresent()) {
-            EthTx ethTx = new EthTx().setTxHash(tx.getHash())
-                    .setSuccess(receipt.get().isStatusOK())
-                    .setTxIndex(tx.getTransactionIndex().intValue())
-                    .setAmount(fromWei(tx.getValue()))
-                    .setBlockHeight(tx.getBlockNumber().longValue())
-                    .setFeeUsed(tx.getGas().longValue())
-                    .setFeePrice(tx.getGasPrice().longValue())
-                    .setBlockTime(block.getTimestamp().longValue())
-                    .setFromAddress(tx.getFrom())
-                    .setToAddress(tx.getTo());
-
-            txList.add(ethTx);
-        } else {
+    private void parseTx0(List<EthTx> txList, EthBlock.Block block,
+                          EthBlock.TransactionObject tx ,
+                          Optional<TransactionReceipt> receipt) {
+        if (!receipt.isPresent()) {
             log.warn("Tx={}, receipt is not present", tx.getHash());
+            return;
         }
+
+        EthTx ethTx = new EthTx().setTxHash(tx.getHash())
+                .setSuccess(receipt.get().isStatusOK())
+                .setTxIndex(tx.getTransactionIndex().intValue())
+                .setAmount(fromWei(tx.getValue()))
+                .setBlockHeight(tx.getBlockNumber().longValue())
+                .setFeeUsed(tx.getGas().longValue())
+                .setFeePrice(tx.getGasPrice().longValue())
+                .setBlockTime(block.getTimestamp().longValue())
+                .setFromAddress(tx.getFrom())
+                .setToAddress(tx.getTo());
+
+        txList.add(ethTx);
     }
 
 }
