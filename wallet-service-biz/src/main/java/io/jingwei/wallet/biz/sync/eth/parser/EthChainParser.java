@@ -21,7 +21,7 @@ public class EthChainParser {
         return this;
     }
 
-    public void parse(ParserContext context) {
+    public void parse(EthBlockContext context, String txHash) {
         if (index == parsers.size()) return;
 
         EthParser parser = parsers.get(index);

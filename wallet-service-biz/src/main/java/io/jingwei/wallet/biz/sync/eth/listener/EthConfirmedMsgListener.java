@@ -5,7 +5,7 @@ import io.andy.rocketmq.wrapper.core.producer.RMProducer;
 import io.jingwei.wallet.biz.config.EthSyncConfig;
 import io.jingwei.wallet.biz.entity.EthTx;
 import io.jingwei.wallet.biz.service.IEthTxService;
-import io.jingwei.wallet.biz.sync.eth.parser.ParserContext;
+import io.jingwei.wallet.biz.sync.eth.parser.EthBlockContext;
 import io.jingwei.wallet.biz.utils.AsyncTaskService;
 import io.jingwei.wallet.biz.utils.SingleThreadedAsyncTaskService;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +50,7 @@ public class EthConfirmedMsgListener implements EthParseListener {
      *  消费端需要自己处理幂等问题，不排除同一个消息多次投递
      */
     @Override
-    public void onComplete(ParserContext context) {
+    public void onComplete(EthBlockContext context) {
         confirmAsyncService.execute(build(TX_CONFIRM_EXECUTOR_NAME, ethSyncConfig.getNodeName()), ()->{
             long currentHeight = context.getBlock().getNumber().longValue();
             List<EthTx> ethTxList =  ethTxService.listConfirmedTx(currentHeight);

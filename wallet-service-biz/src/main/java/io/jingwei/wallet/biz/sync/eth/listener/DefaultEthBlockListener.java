@@ -62,7 +62,7 @@ public class DefaultEthBlockListener extends AbstractEthBlockListener {
 
     @Override
     protected void parseTxAsync() {
-        EthBlock.Block block = parserContext.getBlock();
+        EthBlock.Block block = ethBlockContext.getBlock();
         List<EthBlock.TransactionObject> transactionObjects = block.getTransactions().stream()
                 .map(txResult -> (EthBlock.TransactionObject) txResult.get())
                 .collect(Collectors.toList());
@@ -86,20 +86,20 @@ public class DefaultEthBlockListener extends AbstractEthBlockListener {
     @Override
     protected void parseComplete() {
         txTemplateService.doInTransaction(() -> {
-            ethTxService.saveOrUpdateList(parserContext.getTxList());
-            blockService.saveBlock(parserContext.getBlock());
-            ethLatestService.updateByNewBlock(parserContext.getBlock());
+            ethTxService.saveOrUpdateList(ethBlockContext.getTxList());
+            blockService.saveBlock(ethBlockContext.getBlock());
+            ethLatestService.updateByNewBlock(ethBlockContext.getBlock());
         });
 
-        ethParseListeners.stream().forEach(listener -> listener.onComplete(parserContext));
+        ethParseListeners.stream().forEach(listener -> listener.onComplete(ethBlockContext));
     }
 
     private void parsePipeline(EthBlock.TransactionObject tx) {
         Optional<TransactionReceipt> receipt =  ethRpcCall.getReceipt(tx.getHash());
-        parserContext.setReceipt(receipt);
-        parserContext.setTx(tx);
+        ethBlockContext.getReceiptMap().putIfAbsent( tx.getHash(), receipt);
+        ethBlockContext.getTxMap().putIfAbsent(tx.getHash(), tx);
 
-        ethChainParser.parse(parserContext);
+        ethChainParser.parse(ethBlockContext, tx.getHash());
     }
 
 

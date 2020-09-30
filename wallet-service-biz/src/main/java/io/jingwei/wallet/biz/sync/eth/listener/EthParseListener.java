@@ -1,8 +1,8 @@
 package io.jingwei.wallet.biz.sync.eth.listener;
 
-import io.jingwei.wallet.biz.sync.eth.parser.ParserContext;
+import io.jingwei.wallet.biz.sync.eth.parser.EthBlockContext;
 
 public interface EthParseListener {
 
-    void onComplete(ParserContext context);
+    void onComplete(EthBlockContext context);
 }

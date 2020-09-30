@@ -15,20 +15,20 @@ import static io.jingwei.wallet.biz.utils.EthUtils.fromWei;
 @Scope("prototype")
 @Component
 @Slf4j
-public class EthBlockParser implements EthParser {
+public class EthBlockTxParser implements EthParser {
 
     @Override
-    public void parse(ParserContext context, EthChainParser chain) {
-        parseTx(context);
+    public void parse(EthBlockContext context, EthChainParser chain, String txHash) {
+        parseTx(context, txHash);
 
-        chain.parse(context);
+        chain.parse(context, txHash);
     }
 
-    private void parseTx(ParserContext context) {
+    private void parseTx(EthBlockContext context, String txHash) {
         List<EthTx> txList = context.getTxList();
         EthBlock.Block block = context.getBlock();
-        EthBlock.TransactionObject tx = context.getTx();
-        Optional<TransactionReceipt> receipt = context.getReceipt();
+        EthBlock.TransactionObject tx = context.getTxMap().get(txHash);
+        Optional<TransactionReceipt> receipt = context.getReceiptMap().get(txHash);
 
         parseTx0(txList, block, tx, receipt);
     }
