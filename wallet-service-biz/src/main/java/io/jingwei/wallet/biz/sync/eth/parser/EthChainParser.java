@@ -26,6 +26,6 @@ public class EthChainParser {
 
         EthParser parser = parsers.get(index);
         index++;
-        parser.parse(context, this);
+        parser.parse(context, this, txHash);
     }
 }
