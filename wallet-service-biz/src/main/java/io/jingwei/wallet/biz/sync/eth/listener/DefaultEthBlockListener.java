@@ -10,6 +10,7 @@ import io.jingwei.wallet.biz.sync.eth.parser.EthChainParser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -22,7 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-
+@Scope("prototype")
 @Component
 @Slf4j
 public class DefaultEthBlockListener extends AbstractEthBlockListener {
@@ -96,7 +97,7 @@ public class DefaultEthBlockListener extends AbstractEthBlockListener {
 
     private void parsePipeline(EthBlock.TransactionObject tx) {
         Optional<TransactionReceipt> receipt =  ethRpcCall.getReceipt(tx.getHash());
-        ethBlockContext.getReceiptMap().putIfAbsent( tx.getHash(), receipt);
+        ethBlockContext.getReceiptMap().putIfAbsent(tx.getHash(), receipt);
         ethBlockContext.getTxMap().putIfAbsent(tx.getHash(), tx);
 
         ethChainParser.parse(ethBlockContext, tx.getHash());

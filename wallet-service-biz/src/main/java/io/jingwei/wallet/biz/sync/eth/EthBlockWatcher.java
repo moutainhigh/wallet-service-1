@@ -9,7 +9,6 @@ import io.jingwei.wallet.biz.service.IEthRollbackService;
 import io.jingwei.wallet.biz.support.EthRpcCall;
 import io.jingwei.wallet.biz.support.Web3jClient;
 import io.jingwei.wallet.biz.sync.AbstractBlockWatcher;
-import io.jingwei.wallet.biz.sync.eth.listener.DefaultEthBlockListener;
 import io.jingwei.wallet.biz.sync.eth.listener.EthBlockListener;
 import io.jingwei.wallet.biz.utils.AsyncTaskService;
 import io.jingwei.wallet.biz.utils.ExecutorNameFactory;
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Component;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.response.EthBlock;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -36,9 +34,10 @@ public class EthBlockWatcher extends AbstractBlockWatcher {
 
     private AtomicLong                     lastBlockNumberProcessed = new AtomicLong(0);
 
-    private EthBlockListener               blockListener;
-
     private Disposable                     blockSubscription;
+
+    @Autowired
+    private EthBlockListener               ethBlockListener;
 
     @Autowired
     private IEthBlockNumberService         ethBlockNumberService;
@@ -58,11 +57,6 @@ public class EthBlockWatcher extends AbstractBlockWatcher {
     @Autowired
     private EthRpcCall                     ethRpcCall;
 
-
-    @PostConstruct
-    private void init() {
-        blockListener = new DefaultEthBlockListener();
-    }
 
     @Override
     protected long getStartBlock() {
@@ -121,7 +115,7 @@ public class EthBlockWatcher extends AbstractBlockWatcher {
                         final EthBlock.Block block = getBlockWithNumber(nextBlock);
 
                         if (block != null) {
-                            triggerListener(blockListener, block);
+                            triggerListener(ethBlockListener, block);
                         }
                         updateLastBlockProcessed(block);
                     } catch (Throwable t) {
@@ -130,7 +124,7 @@ public class EthBlockWatcher extends AbstractBlockWatcher {
                 }
             }
 
-            triggerListener(blockListener, ethBlock.getBlock());
+            triggerListener(ethBlockListener, ethBlock.getBlock());
             updateLastBlockProcessed(ethBlock.getBlock());
         });
     }
