@@ -38,15 +38,27 @@ public class DefaultEthBlockListener extends AbstractEthBlockListener {
     @Autowired
     private EthRpcCall                        ethRpcCall;
 
+    /**
+     * Transaction template
+     */
     @Autowired
     private TxTemplateService                 txTemplateService;
 
+    /**
+     * Eth block service
+     */
     @Autowired
     private IEthBlockService                  blockService;
 
+    /**
+     * Eth transaction service
+     */
     @Autowired
     private IEthTxService                     ethTxService;
 
+    /**
+     * Eth latest service
+     */
     @Autowired
     private IEthLatestService                 ethLatestService;
 
